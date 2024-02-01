@@ -92,7 +92,7 @@ for year in $(seq $YEAR_START $YEAR_END); do
             echo "=============== Date: $startDate ===================="
 
             command="copernicus-marine subset --username $CM_USERNAME --password $CM_PASSWORD -i $productId \
-            -v ${variable[0]} -v ${variable[1]} \
+            -v ${variable[0]} -v ${variable[1]} -v ${variable[2]} -v ${variable[3]}-v ${variable[4]} \
             -x ${lon[0]} -X ${lon[1]} -y ${lat[0]} -Y ${lat[1]} \
             -t \"$startDate\" -T \"$startDate\" \
             --force-download -o $tempdir -f raw_motu_${PREFIX}_$(date -d "$startDate" +%Y-%m-%d).nc" 
