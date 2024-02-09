@@ -1,59 +1,56 @@
 #!/bin/bash
 
-# Further Information:   
-# http://www.croco-ocean.org
-#  
-# This file is part of CROCOTOOLS
-#
-# CROCOTOOLS is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published
-# by the Free Software Foundation; either version 2 of the License,
-# or (at your option) any later version.
-#
-# CROCOTOOLS is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-# MA  02111-1307  USA
-#
-# Author : S. Maishal
-# subhadeepmaishal@kgpian.iitkgp.ac.in
-
-
-# User-defined date range
-# pip install copernicus-marine-client
+# User-defined date range for Ocean forcing
 YEAR_START=2018
-MONTH_START=03
-DAY_START=1
+MONTH_START=01
+DAY_START=01
 
 YEAR_END=2018
-MONTH_END=05
+MONTH_END=12
 DAY_END=01
 
-# Output directory
-outdir="/scratch/20cl91p02/CROCO_TOOL_FIX"
+# Output directory (user need to define)
+outdir="/scratch/20cl91p02/CROCO_TOOL_FIX/Oforc_glory_mercator"
 
 # Product and dataset IDs
 serviceId="GLOBAL_MULTIYEAR_PHY_001_030-TDS"
 productId="cmems_mod_glo_phy_my_0.083_P1D-m"
 
 # Coordinates
-lon=(50 100)   #longitude
-lat=(-30 30)     #latitude
+lon=(-180 180)   #longitude
+lat=(-90 90)     #latitude
 
-# Variables
+# Variables need for Ocean forcing
 variable=("zos" "uo" "vo" "thetao" "so")
 
-#copernicus-marine login
-export CM_USERNAME="xxxx"
-export CM_PASSWORD="xxxx"
+# Depth range
+defaultDepthRange="0.493 5727.918"
+depthRange=""
+
+# Parse command line options
+while getopts ":d:" opt; do
+  case $opt in
+    d)
+      depthRange="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# If depth range is not provided, use the default values
+if [ -z "$depthRange" ]; then
+  depthRange="$defaultDepthRange"
+fi
+
+#copernicus-marine login Id and Password (user need to define)
+export CM_USERNAME="xxxxxxx"
+export CM_PASSWORD="xxxxxxx"
 PREFIX="mercator"
 
-# Function to check if a year is a leap year
+# Function to check if a year is a leap year or not
 is_leap_year() {
     year=$1
     if [ $((year % 4)) -eq 0 ] && [ $((year % 100)) -ne 0 ] || [ $((year % 400)) -eq 0 ]; then
@@ -83,18 +80,21 @@ for year in $(seq $YEAR_START $YEAR_END); do
 
         endDate=$(date -d "$endDate + $addDays days" +%Y-%m-%d)
 
-        # Temporary directory for daily files
+        # Temporary directory for daily files (when user dont need to define)
         tempdir="$outdir/temp_daily_files"
         mkdir -p $tempdir
+        depthRangeOption="--depth $depthRange"
 
-        # Download daily data
+        # Download daily data (main for copernicus-marine subset)
         while [[ "$startDate" != "$endDate" ]]; do
             echo "=============== Date: $startDate ===================="
 
             command="copernicus-marine subset --username $CM_USERNAME --password $CM_PASSWORD -i $productId \
-            -v ${variable[0]} -v ${variable[1]} -v ${variable[2]} -v ${variable[3]}-v ${variable[4]} \
+            -v ${variable[0]} -v ${variable[1]} -v ${variable[2]} -v ${variable[3]} -v ${variable[4]} \
             -x ${lon[0]} -X ${lon[1]} -y ${lat[0]} -Y ${lat[1]} \
             -t \"$startDate\" -T \"$startDate\" \
+            --minimum-depth $(echo $depthRange | awk '{print $1}') \
+            --maximum-depth $(echo $depthRange | awk '{print $2}') \
             --force-download -o $tempdir -f raw_motu_${PREFIX}_$(date -d "$startDate" +%Y-%m-%d).nc" 
             
             echo -e "$command \n============="
@@ -103,7 +103,7 @@ for year in $(seq $YEAR_START $YEAR_END); do
             startDate=$(date -d "$startDate + $addDays days" +%Y-%m-%d)
         done
 
-        # Concatenate daily files into a monthly file
+        # Concatenate daily files into a monthly file (user can add this section after the loop)
         monthly_file="$outdir/raw_motu_${PREFIX}_${year}_$month.nc"
         ncrcat -O $tempdir/raw_motu_${PREFIX}_*.nc $monthly_file
         cp -R $monthly_file ../
@@ -114,4 +114,4 @@ for year in $(seq $YEAR_START $YEAR_END); do
     done
 done
 
-echo "=========== Download and concatenation completed! ==========="
+echo "=========== Download and concatenation completed! And Have a good day! if there have CROCO==========="
