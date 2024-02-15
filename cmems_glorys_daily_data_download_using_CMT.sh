@@ -105,7 +105,7 @@ for year in $(seq $YEAR_START $YEAR_END); do
 
         # Concatenate daily files into a monthly file (user can add this section after the loop)
         monthly_file="$outdir/raw_motu_${PREFIX}_${year}_$month.nc"
-        ncrcat -O $tempdir/raw_motu_${PREFIX}_*.nc $monthly_file
+        #ncrcat -O $tempdir/raw_motu_${PREFIX}_*.nc $monthly_file
         cp -R $monthly_file ../
         # Remove temporary daily files
         #rm -rf $tempdir
