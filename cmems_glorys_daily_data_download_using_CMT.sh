@@ -18,7 +18,7 @@ productId="cmems_mod_glo_phy_my_0.083_P1D-m"
 
 # Coordinates
 lon=(-180 180)   #longitude
-lat=(-90 90)     #latitude
+lat=(-80 90)     #latitude
 
 # Variables need for Ocean forcing
 variable=("zos" "uo" "vo" "thetao" "so")
