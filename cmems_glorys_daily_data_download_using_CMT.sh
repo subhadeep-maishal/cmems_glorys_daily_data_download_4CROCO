@@ -14,7 +14,10 @@ outdir="/scratch/20cl91p02/CROCO_TOOL_FIX/Oforc_glory_mercator"
 
 # Product and dataset IDs
 serviceId="GLOBAL_MULTIYEAR_PHY_001_030-TDS"
-productId="cmems_mod_glo_phy_my_0.083_P1D-m"
+#daily data
+productId="cmems_mod_glo_phy_my_0.083deg_P1D-m"
+#for monthly data
+#productId="cmems_mod_glo_phy_my_0.083deg_P1M-m"
 
 # Coordinates
 lon=(-180 180)   #longitude
